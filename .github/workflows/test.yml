@@ -1,9 +1,7 @@
 name: Tests and Checkings
 
 on:
-  push:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   check-assets:

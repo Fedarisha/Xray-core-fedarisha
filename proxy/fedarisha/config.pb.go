@@ -1,0 +1,641 @@
+// Code generated manually for the local FEDARISHA integration.
+// source: proxy/fedarisha/config.proto
+
+package fedarisha
+
+import (
+	reflect "reflect"
+	sync "sync"
+
+	proto "google.golang.org/protobuf/proto"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
+)
+
+const (
+	_ = protoimpl.EnforceVersion(20 - protoimpl.MinVersion)
+	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
+)
+
+type StorageConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Bucket        string                 `protobuf:"bytes,2,opt,name=bucket,proto3" json:"bucket,omitempty"`
+	Endpoint      string                 `protobuf:"bytes,3,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Region        string                 `protobuf:"bytes,4,opt,name=region,proto3" json:"region,omitempty"`
+	Prefix        string                 `protobuf:"bytes,5,opt,name=prefix,proto3" json:"prefix,omitempty"`
+	AccessKey     string                 `protobuf:"bytes,6,opt,name=access_key,json=accessKey,proto3" json:"access_key,omitempty"`
+	SecretKey     string                 `protobuf:"bytes,7,opt,name=secret_key,json=secretKey,proto3" json:"secret_key,omitempty"`
+	LocalDir      string                 `protobuf:"bytes,8,opt,name=local_dir,json=localDir,proto3" json:"local_dir,omitempty"`
+	SessionsDir   string                 `protobuf:"bytes,9,opt,name=sessions_dir,json=sessionsDir,proto3" json:"sessions_dir,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StorageConfig) Reset() {
+	*x = StorageConfig{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StorageConfig) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*StorageConfig) ProtoMessage() {}
+
+func (x *StorageConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*StorageConfig) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *StorageConfig) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetBucket() string {
+	if x != nil {
+		return x.Bucket
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetRegion() string {
+	if x != nil {
+		return x.Region
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetPrefix() string {
+	if x != nil {
+		return x.Prefix
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetAccessKey() string {
+	if x != nil {
+		return x.AccessKey
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetSecretKey() string {
+	if x != nil {
+		return x.SecretKey
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetLocalDir() string {
+	if x != nil {
+		return x.LocalDir
+	}
+	return ""
+}
+
+func (x *StorageConfig) GetSessionsDir() string {
+	if x != nil && x.SessionsDir != "" {
+		return x.SessionsDir
+	}
+	return "sessions"
+}
+
+type TuningConfig struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	PollIntervalMs   uint32                 `protobuf:"varint,1,opt,name=poll_interval_ms,json=pollIntervalMs,proto3" json:"poll_interval_ms,omitempty"`
+	WriteIntervalMs  uint32                 `protobuf:"varint,2,opt,name=write_interval_ms,json=writeIntervalMs,proto3" json:"write_interval_ms,omitempty"`
+	IdleTimeoutSec   uint32                 `protobuf:"varint,3,opt,name=idle_timeout_sec,json=idleTimeoutSec,proto3" json:"idle_timeout_sec,omitempty"`
+	MaxFileSizeBytes uint32                 `protobuf:"varint,4,opt,name=max_file_size_bytes,json=maxFileSizeBytes,proto3" json:"max_file_size_bytes,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *TuningConfig) Reset() {
+	*x = TuningConfig{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TuningConfig) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*TuningConfig) ProtoMessage() {}
+
+func (x *TuningConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*TuningConfig) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *TuningConfig) GetPollIntervalMs() uint32 {
+	if x != nil {
+		return x.PollIntervalMs
+	}
+	return 0
+}
+
+func (x *TuningConfig) GetWriteIntervalMs() uint32 {
+	if x != nil {
+		return x.WriteIntervalMs
+	}
+	return 0
+}
+
+func (x *TuningConfig) GetIdleTimeoutSec() uint32 {
+	if x != nil {
+		return x.IdleTimeoutSec
+	}
+	return 0
+}
+
+func (x *TuningConfig) GetMaxFileSizeBytes() uint32 {
+	if x != nil {
+		return x.MaxFileSizeBytes
+	}
+	return 0
+}
+
+type WebhookConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Listen        string                 `protobuf:"bytes,2,opt,name=listen,proto3" json:"listen,omitempty"`
+	PublicUrl     string                 `protobuf:"bytes,3,opt,name=public_url,json=publicUrl,proto3" json:"public_url,omitempty"`
+	AutoSetup     bool                   `protobuf:"varint,4,opt,name=auto_setup,json=autoSetup,proto3" json:"auto_setup,omitempty"`
+	TlsCert       string                 `protobuf:"bytes,5,opt,name=tls_cert,json=tlsCert,proto3" json:"tls_cert,omitempty"`
+	TlsKey        string                 `protobuf:"bytes,6,opt,name=tls_key,json=tlsKey,proto3" json:"tls_key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WebhookConfig) Reset() {
+	*x = WebhookConfig{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WebhookConfig) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*WebhookConfig) ProtoMessage() {}
+
+func (x *WebhookConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*WebhookConfig) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *WebhookConfig) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *WebhookConfig) GetListen() string {
+	if x != nil {
+		return x.Listen
+	}
+	return ""
+}
+
+func (x *WebhookConfig) GetPublicUrl() string {
+	if x != nil {
+		return x.PublicUrl
+	}
+	return ""
+}
+
+func (x *WebhookConfig) GetAutoSetup() bool {
+	if x != nil {
+		return x.AutoSetup
+	}
+	return false
+}
+
+func (x *WebhookConfig) GetTlsCert() string {
+	if x != nil {
+		return x.TlsCert
+	}
+	return ""
+}
+
+func (x *WebhookConfig) GetTlsKey() string {
+	if x != nil {
+		return x.TlsKey
+	}
+	return ""
+}
+
+type ClientConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Storage       *StorageConfig         `protobuf:"bytes,1,opt,name=storage,proto3" json:"storage,omitempty"`
+	Tuning        *TuningConfig          `protobuf:"bytes,3,opt,name=tuning,proto3" json:"tuning,omitempty"`
+	UserLevel     uint32                 `protobuf:"varint,4,opt,name=user_level,json=userLevel,proto3" json:"user_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClientConfig) Reset() {
+	*x = ClientConfig{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientConfig) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*ClientConfig) ProtoMessage() {}
+
+func (x *ClientConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*ClientConfig) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ClientConfig) GetStorage() *StorageConfig {
+	if x != nil {
+		return x.Storage
+	}
+	return nil
+}
+
+func (x *ClientConfig) GetTuning() *TuningConfig {
+	if x != nil {
+		return x.Tuning
+	}
+	return nil
+}
+
+func (x *ClientConfig) GetUserLevel() uint32 {
+	if x != nil {
+		return x.UserLevel
+	}
+	return 0
+}
+
+type User struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Level         uint32                 `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *User) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*User) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *User) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *User) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *User) GetLevel() uint32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+type ServerConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Storage       *StorageConfig         `protobuf:"bytes,1,opt,name=storage,proto3" json:"storage,omitempty"`
+	Tuning        *TuningConfig          `protobuf:"bytes,2,opt,name=tuning,proto3" json:"tuning,omitempty"`
+	Clients       []*User                `protobuf:"bytes,3,rep,name=clients,proto3" json:"clients,omitempty"`
+	UserLevel     uint32                 `protobuf:"varint,5,opt,name=user_level,json=userLevel,proto3" json:"user_level,omitempty"`
+	Webhook       *WebhookConfig         `protobuf:"bytes,6,opt,name=webhook,proto3" json:"webhook,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerConfig) Reset() {
+	*x = ServerConfig{}
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerConfig) String() string { return protoimpl.X.MessageStringOf(x) }
+
+func (*ServerConfig) ProtoMessage() {}
+
+func (x *ServerConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_proxy_fedarisha_config_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*ServerConfig) Descriptor() ([]byte, []int) {
+	return file_proxy_fedarisha_config_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ServerConfig) GetStorage() *StorageConfig {
+	if x != nil {
+		return x.Storage
+	}
+	return nil
+}
+
+func (x *ServerConfig) GetTuning() *TuningConfig {
+	if x != nil {
+		return x.Tuning
+	}
+	return nil
+}
+
+func (x *ServerConfig) GetClients() []*User {
+	if x != nil {
+		return x.Clients
+	}
+	return nil
+}
+
+func (x *ServerConfig) GetUserLevel() uint32 {
+	if x != nil {
+		return x.UserLevel
+	}
+	return 0
+}
+
+func (x *ServerConfig) GetWebhook() *WebhookConfig {
+	if x != nil {
+		return x.Webhook
+	}
+	return nil
+}
+
+var File_proxy_fedarisha_config_proto protoreflect.FileDescriptor
+
+var (
+	file_proxy_fedarisha_config_proto_rawDescOnce sync.Once
+	file_proxy_fedarisha_config_proto_rawDescData []byte
+)
+
+func file_proxy_fedarisha_config_proto_rawDescGZIP() []byte {
+	file_proxy_fedarisha_config_proto_rawDescOnce.Do(func() {
+		file_proxy_fedarisha_config_proto_rawDescData = protoimpl.X.CompressGZIP(file_proxy_fedarisha_config_proto_rawDesc())
+	})
+	return file_proxy_fedarisha_config_proto_rawDescData
+}
+
+var file_proxy_fedarisha_config_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proxy_fedarisha_config_proto_goTypes = []any{
+	(*StorageConfig)(nil), // 0: xray.proxy.fedarisha.StorageConfig
+	(*TuningConfig)(nil),  // 1: xray.proxy.fedarisha.TuningConfig
+	(*WebhookConfig)(nil), // 2: xray.proxy.fedarisha.WebhookConfig
+	(*ClientConfig)(nil),  // 3: xray.proxy.fedarisha.ClientConfig
+	(*User)(nil),          // 4: xray.proxy.fedarisha.User
+	(*ServerConfig)(nil),  // 5: xray.proxy.fedarisha.ServerConfig
+}
+var file_proxy_fedarisha_config_proto_depIdxs = []int32{
+	0, // 0: xray.proxy.fedarisha.ClientConfig.storage:type_name -> xray.proxy.fedarisha.StorageConfig
+	1, // 1: xray.proxy.fedarisha.ClientConfig.tuning:type_name -> xray.proxy.fedarisha.TuningConfig
+	0, // 2: xray.proxy.fedarisha.ServerConfig.storage:type_name -> xray.proxy.fedarisha.StorageConfig
+	1, // 3: xray.proxy.fedarisha.ServerConfig.tuning:type_name -> xray.proxy.fedarisha.TuningConfig
+	4, // 4: xray.proxy.fedarisha.ServerConfig.clients:type_name -> xray.proxy.fedarisha.User
+	2, // 5: xray.proxy.fedarisha.ServerConfig.webhook:type_name -> xray.proxy.fedarisha.WebhookConfig
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
+}
+
+func init() { file_proxy_fedarisha_config_proto_init() }
+
+func file_proxy_fedarisha_config_proto_init() {
+	if File_proxy_fedarisha_config_proto != nil {
+		return
+	}
+	type x struct{}
+	out := protoimpl.TypeBuilder{
+		File: protoimpl.DescBuilder{
+			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
+			RawDescriptor: file_proxy_fedarisha_config_proto_rawDesc(),
+			NumEnums:      0,
+			NumMessages:   6,
+			NumExtensions: 0,
+			NumServices:   0,
+		},
+		GoTypes:           file_proxy_fedarisha_config_proto_goTypes,
+		DependencyIndexes: file_proxy_fedarisha_config_proto_depIdxs,
+		MessageInfos:      file_proxy_fedarisha_config_proto_msgTypes,
+	}.Build()
+	File_proxy_fedarisha_config_proto = out.File
+	file_proxy_fedarisha_config_proto_goTypes = nil
+	file_proxy_fedarisha_config_proto_depIdxs = nil
+}
+
+func file_proxy_fedarisha_config_proto_rawDesc() []byte {
+	fd := &descriptorpb.FileDescriptorProto{
+		Name:    proto.String("proxy/fedarisha/config.proto"),
+		Package: proto.String("xray.proxy.fedarisha"),
+		Syntax:  proto.String("proto3"),
+		Options: &descriptorpb.FileOptions{
+			GoPackage:         proto.String("github.com/xtls/xray-core/proxy/fedarisha"),
+			JavaPackage:       proto.String("com.xray.proxy.fedarisha"),
+			JavaMultipleFiles: proto.Bool(true),
+			CsharpNamespace:   proto.String("Xray.Proxy.Fedarisha"),
+		},
+		MessageType: []*descriptorpb.DescriptorProto{
+			{
+				Name: proto.String("StorageConfig"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					stringField("type", 1),
+					stringField("bucket", 2),
+					stringField("endpoint", 3),
+					stringField("region", 4),
+					stringField("prefix", 5),
+					stringField("access_key", 6),
+					stringField("secret_key", 7),
+					stringField("local_dir", 8),
+					stringField("sessions_dir", 9),
+				},
+			},
+			{
+				Name: proto.String("TuningConfig"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					uint32Field("poll_interval_ms", 1),
+					uint32Field("write_interval_ms", 2),
+					uint32Field("idle_timeout_sec", 3),
+					uint32Field("max_file_size_bytes", 4),
+				},
+			},
+			{
+				Name: proto.String("WebhookConfig"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					boolField("enabled", 1),
+					stringField("listen", 2),
+					stringField("public_url", 3),
+					boolField("auto_setup", 4),
+					stringField("tls_cert", 5),
+					stringField("tls_key", 6),
+				},
+			},
+			{
+				Name: proto.String("ClientConfig"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					messageField("storage", 1, ".xray.proxy.fedarisha.StorageConfig", false),
+					messageField("tuning", 3, ".xray.proxy.fedarisha.TuningConfig", false),
+					uint32Field("user_level", 4),
+				},
+			},
+			{
+				Name: proto.String("User"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					stringField("id", 1),
+					stringField("email", 2),
+					uint32Field("level", 3),
+				},
+			},
+			{
+				Name: proto.String("ServerConfig"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					messageField("storage", 1, ".xray.proxy.fedarisha.StorageConfig", false),
+					messageField("tuning", 2, ".xray.proxy.fedarisha.TuningConfig", false),
+					messageField("clients", 3, ".xray.proxy.fedarisha.User", true),
+					uint32Field("user_level", 5),
+					messageField("webhook", 6, ".xray.proxy.fedarisha.WebhookConfig", false),
+				},
+			},
+		},
+	}
+	data, err := proto.Marshal(fd)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func stringField(name string, number int32) *descriptorpb.FieldDescriptorProto {
+	return &descriptorpb.FieldDescriptorProto{
+		Name:   proto.String(name),
+		Number: proto.Int32(number),
+		Label:  descriptorpb.FieldDescriptorProto_LABEL_OPTIONAL.Enum(),
+		Type:   descriptorpb.FieldDescriptorProto_TYPE_STRING.Enum(),
+	}
+}
+
+func uint32Field(name string, number int32) *descriptorpb.FieldDescriptorProto {
+	return &descriptorpb.FieldDescriptorProto{
+		Name:   proto.String(name),
+		Number: proto.Int32(number),
+		Label:  descriptorpb.FieldDescriptorProto_LABEL_OPTIONAL.Enum(),
+		Type:   descriptorpb.FieldDescriptorProto_TYPE_UINT32.Enum(),
+	}
+}
+
+func boolField(name string, number int32) *descriptorpb.FieldDescriptorProto {
+	return &descriptorpb.FieldDescriptorProto{
+		Name:   proto.String(name),
+		Number: proto.Int32(number),
+		Label:  descriptorpb.FieldDescriptorProto_LABEL_OPTIONAL.Enum(),
+		Type:   descriptorpb.FieldDescriptorProto_TYPE_BOOL.Enum(),
+	}
+}
+
+func messageField(name string, number int32, typeName string, repeated bool) *descriptorpb.FieldDescriptorProto {
+	label := descriptorpb.FieldDescriptorProto_LABEL_OPTIONAL
+	if repeated {
+		label = descriptorpb.FieldDescriptorProto_LABEL_REPEATED
+	}
+	return &descriptorpb.FieldDescriptorProto{
+		Name:     proto.String(name),
+		Number:   proto.Int32(number),
+		Label:    label.Enum(),
+		Type:     descriptorpb.FieldDescriptorProto_TYPE_MESSAGE.Enum(),
+		TypeName: proto.String(typeName),
+	}
+}

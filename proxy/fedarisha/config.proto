@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package xray.proxy.fedarisha;
+option csharp_namespace = "Xray.Proxy.Fedarisha";
+option go_package = "github.com/xtls/xray-core/proxy/fedarisha";
+option java_package = "com.xray.proxy.fedarisha";
+option java_multiple_files = true;
+
+message StorageConfig {
+  string type = 1;
+  string bucket = 2;
+  string endpoint = 3;
+  string region = 4;
+  string prefix = 5;
+  string access_key = 6;
+  string secret_key = 7;
+  string local_dir = 8;
+  string sessions_dir = 9;
+}
+
+message TuningConfig {
+  uint32 poll_interval_ms = 1;
+  uint32 write_interval_ms = 2;
+  uint32 idle_timeout_sec = 3;
+  uint32 max_file_size_bytes = 4;
+}
+
+message WebhookConfig {
+  bool enabled = 1;
+  string listen = 2;
+  string public_url = 3;
+  bool auto_setup = 4;
+  string tls_cert = 5;
+  string tls_key = 6;
+}
+
+message ClientConfig {
+  StorageConfig storage = 1;
+  reserved 2;
+  TuningConfig tuning = 3;
+  uint32 user_level = 4;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  uint32 level = 3;
+}
+
+message ServerConfig {
+  StorageConfig storage = 1;
+  TuningConfig tuning = 2;
+  repeated User clients = 3;
+  reserved 4;
+  uint32 user_level = 5;
+  WebhookConfig webhook = 6;
+}

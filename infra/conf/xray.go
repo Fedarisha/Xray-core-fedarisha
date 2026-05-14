@@ -31,6 +31,7 @@ var (
 		"wireguard":     func() interface{} { return &WireGuardConfig{IsClient: false} },
 		"hysteria":      func() interface{} { return new(HysteriaServerConfig) },
 		"tun":           func() interface{} { return new(TunConfig) },
+		"fedarisha":     func() interface{} { return new(FedarishaServerConfig) },
 	}, "protocol", "settings")
 
 	outboundConfigLoader = NewJSONConfigLoader(ConfigCreatorCache{
@@ -48,6 +49,7 @@ var (
 		"hysteria":    func() interface{} { return new(HysteriaClientConfig) },
 		"dns":         func() interface{} { return new(DNSOutboundConfig) },
 		"wireguard":   func() interface{} { return &WireGuardConfig{IsClient: true} },
+		"fedarisha":   func() interface{} { return new(FedarishaClientConfig) },
 	}, "protocol", "settings")
 )
 
@@ -136,9 +138,11 @@ type InboundDetourConfig struct {
 func (c *InboundDetourConfig) Build() (*core.InboundHandlerConfig, error) {
 	receiverSettings := &proxyman.ReceiverConfig{}
 
-	// TUN inbound doesn't need port configuration as it uses network interface instead
-	if strings.ToLower(c.Protocol) == "tun" {
-		// Skip port validation for TUN
+	// TUN inbound doesn't need port configuration as it uses network interface instead.
+	// Fedarisha inbound also has no TCP listener — it tunnels through S3 storage.
+	protocolLower := strings.ToLower(c.Protocol)
+	if protocolLower == "tun" || protocolLower == "fedarisha" {
+		// Skip port validation for TUN / fedarisha
 	} else if c.ListenOn == nil {
 		// Listen on anyip, must set PortList
 		if c.PortList == nil {
