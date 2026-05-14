@@ -1,0 +1,89 @@
+name: Build & Push Xray
+
+on:
+  push:
+    tags:
+      - '*-fed.*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Xray-core
+        uses: actions/checkout@v4
+        with:
+          path: Xray-core
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: Xray-core/go.mod
+
+      - name: Build Xray
+        working-directory: Xray-core
+        run: |
+          go mod download
+          go test ./proxy/fedarisha
+          go test ./infra/conf -run TestFedarisha
+          COMMID=$(git describe --always --dirty)
+          mkdir -p build_assets
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+            -o build_assets/xray \
+            -trimpath \
+            -buildvcs=false \
+            -gcflags="all=-l=4" \
+            -ldflags="-X github.com/xtls/xray-core/core.build=${COMMID} -s -w -buildid=" \
+            ./main
+
+      - name: Build image context
+        working-directory: Xray-core
+        run: |
+          mkdir -p docker-context
+          cp build_assets/xray docker-context/xray
+          cat > docker-context/Dockerfile <<'EOF'
+          FROM alpine:3.20
+          RUN apk add --no-cache ca-certificates tzdata
+          COPY xray /usr/local/bin/xray
+          RUN chmod 755 /usr/local/bin/xray \
+            && mkdir -p /usr/local/etc/xray /usr/local/share/xray /var/log/xray \
+            && touch /var/log/xray/access.log /var/log/xray/error.log
+          ADD https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat /usr/local/share/xray/geoip.dat
+          ADD https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat /usr/local/share/xray/geosite.dat
+          VOLUME /usr/local/etc/xray
+          VOLUME /var/log/xray
+          ENTRYPOINT ["/usr/local/bin/xray"]
+          CMD ["-confdir", "/usr/local/etc/xray/"]
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to private registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Resolve image tag
+        working-directory: Xray-core
+        run: |
+          IMAGE_TAG="${{ github.ref_name }}"
+          if [ -z "$IMAGE_TAG" ] || [ "$IMAGE_TAG" = "main" ]; then
+            IMAGE_TAG="${{ github.event.inputs.tag }}"
+          fi
+          if [ -z "$IMAGE_TAG" ]; then
+            IMAGE_TAG="manual"
+          fi
+          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: Xray-core/docker-context
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/fedarisha/xray-core:latest
+            ${{ secrets.REGISTRY_URL }}/fedarisha/xray-core:${{ env.IMAGE_TAG }}

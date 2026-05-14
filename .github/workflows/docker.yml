@@ -1,11 +1,6 @@
 name: Build and Push Docker Image
 
 on:
-  release:
-    types:
-      - published
-      - released
-
   workflow_dispatch:
     inputs:
       tag:
