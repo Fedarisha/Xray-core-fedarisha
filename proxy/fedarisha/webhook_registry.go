@@ -175,7 +175,13 @@ func isS3Storage(storageConfig *StorageConfig) bool {
 		return false
 	}
 	storageType := strings.ToLower(storageConfig.GetType())
-	return storageType == "s3" || storageType == "" && storageConfig.GetBucket() != ""
+	switch storageType {
+	case "s3", "vkcloud-pak", "selectel-iam", "static":
+		return true
+	case "":
+		return storageConfig.GetBucket() != ""
+	}
+	return false
 }
 
 func normalizeS3Prefix(prefix string) string {
