@@ -96,15 +96,6 @@ func buildStorage(ctx context.Context, config *StorageConfig) (fedstorage.Storag
 		}
 	}
 
-	// vkcloud-pak / selectel-iam / static name node-side PAK providers
-	// — distinct credential factories, but on the wire they all speak
-	// the same S3 protocol that this transport implements. Collapse them
-	// to "s3" so the inbound that node provisioned this way boots.
-	switch storageType {
-	case "vkcloud-pak", "selectel-iam", "static":
-		storageType = "s3"
-	}
-
 	switch storageType {
 	case "s3":
 		if config.GetBucket() == "" {

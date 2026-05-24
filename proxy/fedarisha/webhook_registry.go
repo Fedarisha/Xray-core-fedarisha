@@ -176,7 +176,7 @@ func isS3Storage(storageConfig *StorageConfig) bool {
 	}
 	storageType := strings.ToLower(storageConfig.GetType())
 	switch storageType {
-	case "s3", "vkcloud-pak", "selectel-iam", "static":
+	case "s3":
 		return true
 	case "":
 		return storageConfig.GetBucket() != ""
