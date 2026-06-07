@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	stdnet "net"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -129,11 +130,39 @@ func buildStorage(ctx context.Context, config *StorageConfig) (fedstorage.Storag
 
 func yamuxSessionConfig() *yamux.Config {
 	muxCfg := yamux.DefaultConfig()
-	muxCfg.LogOutput = io.Discard
-	muxCfg.MaxStreamWindowSize = 16 * 1024 * 1024
-	muxCfg.ConnectionWriteTimeout = 60 * time.Second
-	muxCfg.KeepAliveInterval = 60 * time.Second
-	muxCfg.StreamOpenTimeout = 60 * time.Second
+	// yamux defaults are tuned for low-latency TCP; this transport rides on S3
+	// with ~50-900ms round trips and quiet pauses (a paused/buffered video sends
+	// nothing for seconds). The stock 60s timeouts then kill a perfectly healthy
+	// session mid-stream — which tears down every multiplexed app connection and
+	// forces YouTube into a ~20s rebuffer. So we relax them hard:
+	//   - StreamOpenTimeout 0: a slow stream-open ack must NOT gracefully close
+	//     the whole session (this was killing sessions ~every 3 min).
+	//   - ConnectionWriteTimeout 5m: tolerate slow S3 round trips for frame
+	//     writes and keepalive pongs instead of declaring the peer dead.
+	// Keepalive stays on (it's the only liveness signal over a connectionless S3
+	// channel) but now waits the full ConnectionWriteTimeout for a pong.
+	muxCfg.LogOutput = os.Stderr
+	// The stream window is the amount of data the sender may have in flight
+	// before it must wait for the receiver's window update. Over S3 each window
+	// update is a full file round trip (hundreds of ms, seconds under load), so
+	// throughput ≈ window / update-RTT. yamux only emits an update once half the
+	// window is consumed, and v0.1.2 has no RTT auto-tuning, so a small window
+	// throttles hard: 16MB / ~1.5s ≈ 10MB/s, collapsing toward zero as S3
+	// latency climbs under load (this looked like a wedge). 64MB lifts the
+	// ceiling ~4x and keeps the sender from stalling every few files. The
+	// receiver buffers up to this per active stream — on a download that memory
+	// is on the client; on an upload it's on the node.
+	muxCfg.MaxStreamWindowSize = 64 * 1024 * 1024
+	// Keepalive doubles as a wedge detector. yamux pings every KeepAliveInterval
+	// and waits up to ConnectionWriteTimeout for the pong, which makes a full
+	// round trip through the S3 data path; if the session deadlocks, the pong
+	// never comes and yamux tears the session down so the outbound re-dials. Our
+	// Conn.Write is non-blocking (it buffers), so ConnectionWriteTimeout never
+	// gates real writes — it's purely the pong deadline, hence safe to shorten
+	// from minutes to ~45s for a recovery of roughly KeepAliveInterval+timeout.
+	muxCfg.ConnectionWriteTimeout = 30 * time.Second
+	muxCfg.KeepAliveInterval = 10 * time.Second
+	muxCfg.StreamOpenTimeout = 0
 	return muxCfg
 }
 

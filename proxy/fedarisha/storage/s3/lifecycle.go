@@ -57,7 +57,7 @@ func (s *S3Store) SetupLifecycle(ctx context.Context, prefix string) error {
 		rules = append(rules, r)
 	}
 
-	_, err = s.client.PutBucketLifecycleConfiguration(ctx, &s3.PutBucketLifecycleConfigurationInput{
+	_, err = s.readClient.PutBucketLifecycleConfiguration(ctx, &s3.PutBucketLifecycleConfigurationInput{
 		Bucket: aws.String(s.cfg.Bucket),
 		LifecycleConfiguration: &s3types.BucketLifecycleConfiguration{
 			Rules: rules,
@@ -70,7 +70,7 @@ func (s *S3Store) SetupLifecycle(ctx context.Context, prefix string) error {
 }
 
 func (s *S3Store) fetchLifecycleRules(ctx context.Context) ([]s3types.LifecycleRule, error) {
-	out, err := s.client.GetBucketLifecycleConfiguration(ctx, &s3.GetBucketLifecycleConfigurationInput{
+	out, err := s.readClient.GetBucketLifecycleConfiguration(ctx, &s3.GetBucketLifecycleConfigurationInput{
 		Bucket: aws.String(s.cfg.Bucket),
 	})
 	if err == nil {

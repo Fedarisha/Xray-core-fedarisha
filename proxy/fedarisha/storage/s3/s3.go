@@ -30,9 +30,38 @@ type Config struct {
 }
 
 // S3Store implements storage.Storage for S3-compatible backends.
+//
+// Reads and writes use SEPARATE s3.Clients with independent HTTP connection
+// pools. This is deliberate: fedarisha multiplexes a bidirectional stream over
+// S3, and a heavy read flood (GET-ing the peer's data files, plus DELETE-ing
+// consumed ones) must never exhaust the connection pool that the write path
+// (PUT-ing window-update / data files) depends on. When they shared one pool, a
+// sustained download saturated it, starved the window-update PUTs, and the
+// peer's yamux send window filled and the whole channel wedged. Splitting the
+// pools guarantees the write direction always has connections of its own.
 type S3Store struct {
-	cfg    Config
-	client *s3.Client
+	cfg         Config
+	readClient  *s3.Client // GET, List, Delete, HeadBucket, lifecycle (read/cleanup path)
+	writeClient *s3.Client // PutObject only (the latency-critical write path)
+}
+
+// newHTTPClient builds an HTTP client with a private connection pool sized to
+// maxConns. Per-op context timeouts (read/upload) are the real deadline, so
+// ResponseHeaderTimeout is only a backstop.
+func newHTTPClient(maxConns int) *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConns:          maxConns,
+			MaxIdleConnsPerHost:   maxConns,
+			MaxConnsPerHost:       maxConns,
+			IdleConnTimeout:       120 * time.Second,
+			ResponseHeaderTimeout: 15 * time.Second,
+			DialContext: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+		},
+	}
 }
 
 // New creates a new S3 storage backend.
@@ -44,37 +73,30 @@ func New(cfg Config) *S3Store {
 		cfg.Prefix += "/"
 	}
 
-	// Tuned HTTP transport for high-frequency small requests.
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConns:          50,
-			MaxIdleConnsPerHost:   30,
-			IdleConnTimeout:       120 * time.Second,
-			ResponseHeaderTimeout: 30 * time.Second,
-			DialContext: (&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-		},
+	newClient := func(hc *http.Client) *s3.Client {
+		opts := []func(*s3.Options){
+			func(o *s3.Options) {
+				o.Region = cfg.Region
+				o.Credentials = credentials.NewStaticCredentialsProvider(cfg.AccessKey, cfg.SecretKey, "")
+				o.HTTPClient = hc
+			},
+		}
+		if cfg.Endpoint != "" {
+			opts = append(opts, func(o *s3.Options) {
+				o.BaseEndpoint = aws.String(cfg.Endpoint)
+				o.UsePathStyle = true
+			})
+		}
+		return s3.New(s3.Options{}, opts...)
 	}
 
-	opts := []func(*s3.Options){
-		func(o *s3.Options) {
-			o.Region = cfg.Region
-			o.Credentials = credentials.NewStaticCredentialsProvider(cfg.AccessKey, cfg.SecretKey, "")
-			o.HTTPClient = httpClient
-		},
+	// Read pool covers concurrent GETs (read-ahead window × hedge) and the
+	// DELETEs of consumed files; write pool is dedicated to the PUT workers.
+	return &S3Store{
+		cfg:         cfg,
+		readClient:  newClient(newHTTPClient(96)),
+		writeClient: newClient(newHTTPClient(48)),
 	}
-	if cfg.Endpoint != "" {
-		opts = append(opts, func(o *s3.Options) {
-			o.BaseEndpoint = aws.String(cfg.Endpoint)
-			o.UsePathStyle = true
-		})
-	}
-
-	client := s3.New(s3.Options{}, opts...)
-
-	return &S3Store{cfg: cfg, client: client}
 }
 
 func (s *S3Store) key(path string) string {
@@ -86,7 +108,7 @@ func (s *S3Store) key(path string) string {
 
 func (s *S3Store) Init(ctx context.Context) error {
 	// Verify access by doing a HeadBucket.
-	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{
+	_, err := s.readClient.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(s.cfg.Bucket),
 	})
 	return err
@@ -98,7 +120,7 @@ func (s *S3Store) EnsureDir(_ context.Context, _ string) error {
 }
 
 func (s *S3Store) Upload(ctx context.Context, path string, data []byte) error {
-	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
+	_, err := s.writeClient.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.cfg.Bucket),
 		Key:    aws.String(s.key(path)),
 		Body:   bytes.NewReader(data),
@@ -107,7 +129,7 @@ func (s *S3Store) Upload(ctx context.Context, path string, data []byte) error {
 }
 
 func (s *S3Store) Download(ctx context.Context, path string) ([]byte, error) {
-	out, err := s.client.GetObject(ctx, &s3.GetObjectInput{
+	out, err := s.readClient.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.cfg.Bucket),
 		Key:    aws.String(s.key(path)),
 	})
@@ -132,7 +154,7 @@ func (s *S3Store) List(ctx context.Context, dir string, prefix string) ([]storag
 	var result []storage.FileInfo
 	var token *string
 	for {
-		out, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		out, err := s.readClient.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 			Bucket:            aws.String(s.cfg.Bucket),
 			Prefix:            aws.String(searchPrefix),
 			Delimiter:         aws.String("/"),
@@ -184,7 +206,7 @@ func (s *S3Store) List(ctx context.Context, dir string, prefix string) ([]storag
 }
 
 func (s *S3Store) Delete(ctx context.Context, path string) error {
-	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+	_, err := s.readClient.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(s.cfg.Bucket),
 		Key:    aws.String(s.key(path)),
 	})
@@ -226,7 +248,7 @@ func (s *S3Store) BatchDelete(ctx context.Context, paths []string) error {
 	for i, p := range paths {
 		objects[i] = s3types.ObjectIdentifier{Key: aws.String(s.key(p))}
 	}
-	_, err := s.client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
+	_, err := s.readClient.DeleteObjects(ctx, &s3.DeleteObjectsInput{
 		Bucket: aws.String(s.cfg.Bucket),
 		Delete: &s3types.Delete{Objects: objects, Quiet: aws.Bool(true)},
 	})
