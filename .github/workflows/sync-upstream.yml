@@ -27,6 +27,12 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          # Push via a repo-scoped deploy key (SSH), NOT the default GITHUB_TOKEN.
+          # The built-in App token is forbidden from pushing changes to
+          # .github/workflows/* files, which upstream edits regularly; a deploy
+          # key is exempt from that restriction and is scoped to this repo only.
+          ssh-key: ${{ secrets.SYNC_SSH_KEY }}
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
