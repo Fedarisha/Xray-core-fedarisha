@@ -7,8 +7,8 @@
 //
 //  2. Both sides exchange data by writing small files into that directory.
 //     File naming: {direction}_{seqNo}  (e.g. "c_00000042", "s_00000001")
-//       - "c_" prefix = client → server
-//       - "s_" prefix = server → client
+//     - "c_" prefix = client → server
+//     - "s_" prefix = server → client
 //     Compressed files use "z" infix: "cz00000042", "sz00000001"
 //
 //  3. Each side tries to GET the next expected file directly (no List).

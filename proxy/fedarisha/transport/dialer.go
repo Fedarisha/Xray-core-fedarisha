@@ -14,7 +14,7 @@ const x25519KeySize = 32
 // Dialer creates outbound FEDARISHA connections (client side).
 type Dialer struct {
 	Store         storage.Storage
-	SessionsDir   string        // e.g. "sessions"
+	SessionsDir   string // e.g. "sessions"
 	PollInterval  time.Duration
 	WriteInterval time.Duration
 	IdleTimeout   time.Duration
