@@ -3,7 +3,7 @@ module github.com/xtls/xray-core
 go 1.26
 
 require (
-	github.com/apernet/quic-go v0.59.1-0.20260425001925-6c6cc9bcb716
+	github.com/apernet/quic-go v0.61.1-0.20260806010916-184d081eef3e
 	github.com/aws/aws-sdk-go-v2 v1.43.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.36
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2
@@ -15,6 +15,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/yamux v0.1.2
 	github.com/klauspost/cpuid/v2 v2.4.0
+	github.com/libp2p/go-nat v1.0.1-0.20250821073202-01afc089f138
 	github.com/miekg/dns v1.1.73
 	github.com/pelletier/go-toml v1.9.5
 	github.com/pion/stun/v3 v3.1.7
@@ -54,9 +55,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.38 // indirect
 	github.com/aws/smithy-go v1.27.8 // indirect
 	github.com/google/btree v1.1.2 // indirect
+	github.com/google/gopacket v1.1.19 // indirect
+	github.com/huin/goupnp v1.2.0 // indirect
+	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/juju/ratelimit v1.0.2 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
+	github.com/koron/go-ssdp v0.0.4 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/libp2p/go-netroute v0.2.1 // indirect
 	github.com/pion/dtls/v3 v3.1.5 // indirect
 	github.com/pion/logging v0.2.4 // indirect
 	github.com/pion/transport/v4 v4.1.0 // indirect
