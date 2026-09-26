@@ -73,12 +73,13 @@ func (s *Server) Init(ctx context.Context, _ policy.Manager, dispatcher routing.
 	baseCtx := core.ToBackgroundDetachedContext(ctx)
 	s.ctx, s.cancel = context.WithCancel(baseCtx)
 
-	store, err := buildStorage(s.ctx, s.config.GetStorage())
+	store, err := buildStorage(s.ctx, s.config.GetStorage(), false)
 	if err != nil {
 		return errors.New("fedarisha: failed to configure listener storage").Base(err)
 	}
 
-	opts := fedtransport.ListenOpts{InboundTag: s.tag}
+	opts := fedtransport.ListenOpts{InboundTag: s.tag, IsUserAllowed: s.isUserAllowed}
+	applyListenerTuning(&opts, s.config.GetTuning())
 	hub, closeWebhook, err := registerWebhook(s.ctx, s.tag, s.config.GetStorage(), store, s.config.GetWebhook())
 	if err != nil {
 		return errors.New("fedarisha: failed to configure webhook").Base(err)
@@ -98,9 +99,6 @@ func (s *Server) Init(ctx context.Context, _ policy.Manager, dispatcher routing.
 		}
 		return errors.New("fedarisha: failed to start listener").Base(err)
 	}
-	s.listener.IsUserAllowed = s.isUserAllowed
-	applyListenerTuning(s.listener, s.config.GetTuning())
-
 	go s.acceptLoop()
 	return nil
 }
@@ -128,21 +126,21 @@ func buildInboundUsers(clients []*User, defaultLevel uint32) map[string]*protoco
 	return users
 }
 
-func applyListenerTuning(listener *fedtransport.Listener, tuning *TuningConfig) {
-	if listener == nil || tuning == nil {
+func applyListenerTuning(opts *fedtransport.ListenOpts, tuning *TuningConfig) {
+	if opts == nil || tuning == nil {
 		return
 	}
 	if v := tuning.GetPollIntervalMs(); v > 0 {
-		listener.PollInterval = time.Duration(v) * time.Millisecond
+		opts.PollInterval = time.Duration(v) * time.Millisecond
 	}
 	if v := tuning.GetWriteIntervalMs(); v > 0 {
-		listener.WriteInterval = time.Duration(v) * time.Millisecond
+		opts.WriteInterval = time.Duration(v) * time.Millisecond
 	}
 	if v := tuning.GetIdleTimeoutSec(); v > 0 {
-		listener.IdleTimeout = time.Duration(v) * time.Second
+		opts.IdleTimeout = time.Duration(v) * time.Second
 	}
 	if v := tuning.GetMaxFileSizeBytes(); v > 0 {
-		listener.MaxFileSize = int(v)
+		opts.MaxFileSize = int(v)
 	}
 }
 

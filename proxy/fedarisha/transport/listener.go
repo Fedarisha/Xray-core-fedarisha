@@ -48,12 +48,27 @@ type Listener struct {
 
 // ListenOpts holds optional parameters for Listen/ListenMultiUser.
 type ListenOpts struct {
-	WebhookHub *WebhookHub
-	InboundTag string // stamped onto every accepted Conn
+	WebhookHub    *WebhookHub
+	InboundTag    string // stamped onto every accepted Conn
+	PollInterval  time.Duration
+	WriteInterval time.Duration
+	IdleTimeout   time.Duration
+	MaxFileSize   int
+	IsUserAllowed func(userPrefix string) bool
+}
+
+const DefaultSessionsDir = "sessions"
+
+func effectiveSessionsDir(dir string) string {
+	if strings.TrimSpace(dir) == "" {
+		return DefaultSessionsDir
+	}
+	return dir
 }
 
 // Listen starts watching the sessions directory for new client connections.
 func Listen(ctx context.Context, store storage.Storage, sessionsDir string, opts ...ListenOpts) (*Listener, error) {
+	sessionsDir = effectiveSessionsDir(sessionsDir)
 	if err := store.EnsureDir(ctx, sessionsDir); err != nil {
 		return nil, fmt.Errorf("fedarisha listen: ensure sessions dir: %w", err)
 	}
@@ -68,10 +83,7 @@ func Listen(ctx context.Context, store storage.Storage, sessionsDir string, opts
 		known:       make(map[string]bool),
 		addr:        fedarishaAddr{tag: "fedarisha-listener:" + sessionsDir},
 	}
-	if len(opts) > 0 {
-		l.WebhookHub = opts[0].WebhookHub
-		l.InboundTag = opts[0].InboundTag
-	}
+	l.applyOpts(opts)
 
 	go l.watchLoop()
 	return l, nil
@@ -81,6 +93,7 @@ func Listen(ctx context.Context, store storage.Storage, sessionsDir string, opts
 // It scans */sessionsDir/ for new sessions, where each user has their own
 // subdirectory under the storage root.
 func ListenMultiUser(ctx context.Context, store storage.Storage, sessionsDir string, opts ...ListenOpts) (*Listener, error) {
+	sessionsDir = effectiveSessionsDir(sessionsDir)
 	lCtx, cancel := context.WithCancel(ctx)
 	l := &Listener{
 		Store:       store,
@@ -92,13 +105,24 @@ func ListenMultiUser(ctx context.Context, store storage.Storage, sessionsDir str
 		known:       make(map[string]bool),
 		addr:        fedarishaAddr{tag: "fedarisha-listener:*/" + sessionsDir},
 	}
-	if len(opts) > 0 {
-		l.WebhookHub = opts[0].WebhookHub
-		l.InboundTag = opts[0].InboundTag
-	}
+	l.applyOpts(opts)
 
 	go l.watchLoop()
 	return l, nil
+}
+
+func (l *Listener) applyOpts(opts []ListenOpts) {
+	if len(opts) == 0 {
+		return
+	}
+	opt := opts[0]
+	l.WebhookHub = opt.WebhookHub
+	l.InboundTag = opt.InboundTag
+	l.PollInterval = opt.PollInterval
+	l.WriteInterval = opt.WriteInterval
+	l.IdleTimeout = opt.IdleTimeout
+	l.MaxFileSize = opt.MaxFileSize
+	l.IsUserAllowed = opt.IsUserAllowed
 }
 
 // Accept blocks until a new client session is detected or the listener is closed.
@@ -125,12 +149,11 @@ func (l *Listener) Addr() net.Addr { return l.addr }
 func (l *Listener) watchLoop() {
 	poll := l.PollInterval
 	if poll == 0 {
-		poll = 500 * time.Millisecond // Listener can poll slower — sessions are rare events
-	}
-
-	// With webhooks, use a much longer fallback poll interval.
-	if l.WebhookHub != nil {
-		poll = 10 * time.Second
+		if l.WebhookHub != nil {
+			poll = 10 * time.Second
+		} else {
+			poll = 500 * time.Millisecond // Sessions are rare events.
+		}
 	}
 
 	ticker := time.NewTicker(poll)

@@ -25,7 +25,7 @@ type Dialer struct {
 // Performs X25519 key exchange with the server to establish E2E encryption.
 func (d *Dialer) Dial(ctx context.Context) (*Conn, error) {
 	sessID := GenerateSessionID()
-	sessDir := d.SessionsDir + "/" + sessID
+	sessDir := effectiveSessionsDir(d.SessionsDir) + "/" + sessID
 
 	log.Printf("[fedarisha-client] dialing new session %s", sessID[:8])
 

@@ -69,7 +69,7 @@ func NewClient(ctx context.Context, config *ClientConfig) (*Client, error) {
 }
 
 func buildDialer(ctx context.Context, config *StorageConfig, tuning *TuningConfig) (*fedtransport.Dialer, error) {
-	store, err := buildStorage(ctx, config)
+	store, err := buildStorage(ctx, config, true)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func buildDialer(ctx context.Context, config *StorageConfig, tuning *TuningConfi
 	return dialer, nil
 }
 
-func buildStorage(ctx context.Context, config *StorageConfig) (fedstorage.Storage, error) {
+func buildStorage(ctx context.Context, config *StorageConfig, restrictedCredentials bool) (fedstorage.Storage, error) {
 	if config == nil {
 		return nil, fmt.Errorf("storage config is empty")
 	}
@@ -103,12 +103,13 @@ func buildStorage(ctx context.Context, config *StorageConfig) (fedstorage.Storag
 			return nil, fmt.Errorf("s3 bucket is empty")
 		}
 		store := feds3.New(feds3.Config{
-			Bucket:    config.GetBucket(),
-			Prefix:    config.GetPrefix(),
-			Region:    config.GetRegion(),
-			Endpoint:  config.GetEndpoint(),
-			AccessKey: config.GetAccessKey(),
-			SecretKey: config.GetSecretKey(),
+			Bucket:          config.GetBucket(),
+			Prefix:          config.GetPrefix(),
+			Region:          config.GetRegion(),
+			Endpoint:        config.GetEndpoint(),
+			AccessKey:       config.GetAccessKey(),
+			SecretKey:       config.GetSecretKey(),
+			SkipBucketCheck: restrictedCredentials,
 		})
 		if err := store.Init(ctx); err != nil {
 			return nil, err
