@@ -21,12 +21,13 @@ import (
 
 // Config holds S3 connection parameters.
 type Config struct {
-	Bucket    string // S3 bucket name
-	Prefix    string // Key prefix (e.g. "fedarisha/")
-	Region    string // AWS region (default "us-east-1")
-	Endpoint  string // Custom endpoint for S3-compatible services (MinIO, R2, etc.)
-	AccessKey string
-	SecretKey string
+	Bucket          string // S3 bucket name
+	Prefix          string // Key prefix (e.g. "fedarisha/")
+	Region          string // AWS region (default "us-east-1")
+	Endpoint        string // Custom endpoint for S3-compatible services (MinIO, R2, etc.)
+	AccessKey       string
+	SecretKey       string
+	SkipBucketCheck bool // Prefix-scoped PAKs can use objects but cannot HeadBucket.
 }
 
 // S3Store implements storage.Storage for S3-compatible backends.
@@ -107,6 +108,9 @@ func (s *S3Store) key(path string) string {
 // ---------- storage.Storage ----------
 
 func (s *S3Store) Init(ctx context.Context) error {
+	if s.cfg.SkipBucketCheck {
+		return nil
+	}
 	// Verify access by doing a HeadBucket.
 	_, err := s.readClient.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(s.cfg.Bucket),
