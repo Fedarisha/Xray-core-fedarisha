@@ -241,10 +241,11 @@ type OutboundDetourConfig struct {
 
 func requiresTransportSecurity(address *Address) bool {
 	if address == nil || address.Address == nil {
-		return false
+		return true
 	}
 	if address.Family().IsIP() {
-		return !geodata.GetPrivateIPMatcher().Match(address.IP())
+		ip := address.IP()
+		return !ip.IsPrivate() && !ip.IsLoopback() && !ip.IsLinkLocalUnicast()
 	}
 	domain := strings.TrimSuffix(strings.ToLower(address.Domain()), ".")
 	return !geodata.GetPrivateDomainMatcher().MatchAny(domain)
@@ -612,7 +613,6 @@ func (c *Config) Build() (*core.Config, error) {
 	config := &core.Config{
 		App: []*serial.TypedMessage{
 			serial.ToTypedMessage(&dispatcher.Config{}),
-			serial.ToTypedMessage(&proxyman.InboundConfig{}),
 			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
 		},
 	}
@@ -721,6 +721,9 @@ func (c *Config) Build() (*core.Config, error) {
 		}
 		config.App = append(config.App, serial.ToTypedMessage(r))
 	}
+
+	// Initialize the inbound module last to ensure inbound connections are handled correctly.
+	config.App = append(config.App, serial.ToTypedMessage(&proxyman.InboundConfig{}))
 
 	var inbounds []InboundDetourConfig
 
